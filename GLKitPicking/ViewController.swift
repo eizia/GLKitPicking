@@ -23,11 +23,7 @@ class GLController: GLKViewController {
         self.cubeView.resize()
         // Do any additional setup after loading the view, typically from a nib.
     }
-    
-    override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
-        self.paused = !self.paused
-        
-    }
+   
     
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()

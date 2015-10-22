@@ -106,11 +106,17 @@ class CubeView: GLKView {
     var _increasing:Bool = false
     var _curRed:Float = 0.5
     var _rotation:Float = 0
+    var _rotMatrix:GLKMatrix4 = GLKMatrix4Identity
+    var _quat:GLKQuaternion = GLKQuaternionMake(0, 0, 0, 1)
+    var _quatStart:GLKQuaternion = GLKQuaternionMake(0, 0, 0, 1)
+    var _anchor_position:GLKVector3!
+    var _current_position:GLKVector3!
     var indexBuffer: GLuint = GLuint()
     var vertexBuffer: GLuint = GLuint()
     var vertexArray: GLuint = GLuint()
     var cubeEffect = GLKBaseEffect()
     var controller:GLKViewController?
+    var camera:SphereCamera!
     
     required init?(coder aDecoder: NSCoder) {
         super.init(coder:aDecoder)
@@ -146,14 +152,16 @@ class CubeView: GLKView {
         self.cubeEffect.light0.ambientColor = GLKVector4Make(0, 0, 0, 1);
         self.cubeEffect.light0.specularColor = GLKVector4Make(0, 0, 0, 1);
         
+
         
+
         glGenVertexArraysOES(1, &vertexArray);
         glBindVertexArrayOES(vertexArray);
+        
         
         glGenBuffers(1, &vertexBuffer)
         glBindBuffer(GLenum(GL_ARRAY_BUFFER), vertexBuffer)
         glBufferData(GLenum(GL_ARRAY_BUFFER), Vertices.size(), Vertices, GLenum(GL_DYNAMIC_DRAW))
-        
         
         glEnableVertexAttribArray(GLuint(GLKVertexAttrib.Position.rawValue))
         glVertexAttribPointer(GLuint(GLKVertexAttrib.Position.rawValue), 3, GLenum(GL_FLOAT), GLboolean(UInt8(GL_FALSE)), GLsizei(sizeof(Vertex)), UnsafePointer<Int>(bitPattern: 0))
@@ -168,7 +176,7 @@ class CubeView: GLKView {
         glBindBuffer(GLenum(GL_ELEMENT_ARRAY_BUFFER), indexBuffer)
         glBufferData(GLenum(GL_ELEMENT_ARRAY_BUFFER), Indices.size(), Indices, GLenum(GL_DYNAMIC_DRAW))
         
-        
+
         glBindVertexArrayOES(0);
         
     }
@@ -176,12 +184,57 @@ class CubeView: GLKView {
     func resize(){
             
         if self.controller != nil {
-            self.cubeEffect.transform.projectionMatrix = GLKMatrix4MakePerspective(
-                GLKMathDegreesToRadians(25),
-                Float(self.controller!.view.bounds.size.width / self.controller!.view.bounds.size.height), 2, 30)
+            self.camera = SphereCamera(width: self.frame.width, height: self.frame.height, fieldOfView: 60, near: 2, far: 30, target: GLKVector3Make(0, 0, 0))
+            self.cubeEffect.transform.projectionMatrix = self.camera.projection
         }
     }
     
+    override func touchesBegan(touchSet: Set<UITouch>, withEvent event: UIEvent!) {
+        //        self.paused = !self.paused
+        
+        let touches = Array(touchSet)
+        if touches.count >= 1{
+            let touch:UITouch = touches.first!
+            let point:CGPoint = touch.locationInView(self)
+            
+            
+            _anchor_position = projectOntoSurface(Float(self.frame.size.width), Float(self.frame.size.height), GLKVector3Make(Float(point.x), Float(point.y), 0))
+            
+            _quatStart = _quat;
+            _current_position = _anchor_position
+        }
+        
+    }
+    
+    override func touchesMoved(touchSet: Set<UITouch>, withEvent event: UIEvent!) {
+        //        self.paused = !self.paused
+        
+        let touches = Array(touchSet)
+        if touches.count >= 1{
+            let touch:UITouch = touches.first!
+            let point:CGPoint = touch.locationInView(self)
+            let lastPoint:CGPoint = touch.previousLocationInView(self)
+            let diff = CGPointMake(lastPoint.x - point.x, lastPoint.y - point.y)
+            
+            
+            let rotX = -1 * GLKMathDegreesToRadians(Float(diff.y) / 2.0);
+            let rotY = -1 * GLKMathDegreesToRadians(Float(diff.x) / 2.0);
+            
+            
+            let xAxis = GLKVector3Make(1, 0, 0);
+            let yAxis = GLKVector3Make(0, 1, 0);
+            _rotMatrix = GLKMatrix4Rotate(_rotMatrix, rotX, xAxis.x, xAxis.y, xAxis.z);
+            _rotMatrix = GLKMatrix4Rotate(_rotMatrix, rotY, yAxis.x, yAxis.y, yAxis.z);
+            
+            
+            _current_position = projectOntoSurface(Float(self.frame.size.width), Float(self.frame.size.height), GLKVector3Make(Float(point.x), Float(point.y), 0))
+            
+            
+            
+            _quat = GLKQuaternionMultiply(computeQuaternion(_anchor_position, _current_position), _quatStart);
+        }
+        
+    }
     
     
     override func drawRect(rect:CGRect){
@@ -189,15 +242,10 @@ class CubeView: GLKView {
             
             self.cubeEffect.prepareToDraw()
             
-            _rotation += 10 * Float(self.controller!.timeSinceLastDraw)
             
             var modelViewMatrix = GLKMatrix4MakeTranslation(0.0, 0.0, -15.0)
-            modelViewMatrix = GLKMatrix4Rotate(modelViewMatrix, GLKMathDegreesToRadians(25), 1, 0, 0)
-            modelViewMatrix = GLKMatrix4Rotate(modelViewMatrix, GLKMathDegreesToRadians(_rotation), 0, 1, 0)
-            
-            self.cubeEffect.transform.modelviewMatrix = GLKMatrix4Rotate(
-                    modelViewMatrix,
-                    GLKMathDegreesToRadians(_rotation), 0, 0, 1);
+            modelViewMatrix = GLKMatrix4Multiply(modelViewMatrix, GLKMatrix4MakeWithQuaternion(_quat))
+            self.cubeEffect.transform.modelviewMatrix = modelViewMatrix
             
             
             glClearColor(1, 1, 1, 1.0);
@@ -212,6 +260,3 @@ class CubeView: GLKView {
     
     
 }
-
-
-
