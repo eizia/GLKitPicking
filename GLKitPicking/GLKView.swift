@@ -16,40 +16,40 @@ import GLKit
 
 struct Vertex {
     var Position: (x:CFloat, y:CFloat, z:CFloat)
-    var Color: (CFloat, CFloat, CFloat, CFloat)
-    var Normal: (CFloat, CFloat, CFloat)
+    var Color: (r:CFloat, g:CFloat, b:CFloat, a:CFloat)
+    var Normal: (x:CFloat, y:CFloat, z:CFloat)
 }
 
 var Vertices = [
-    Vertex(Position: (1, -1, 1) , Color: (1, 0, 0, 1), Normal:(0,0,1) ),
-    Vertex(Position: (1, 1, 1)  , Color: (0, 1, 0, 1), Normal:(0,0,1) ),
-    Vertex(Position: (-1, 1, 1) , Color: (0, 0, 1, 1), Normal:(0,0,1) ),
-    Vertex(Position: (-1, -1, 1), Color: (0, 0, 0, 1), Normal:(0,0,1) ),
+    Vertex(Position: (1, -1, 1) , Color: (1, 0, 0, 1), Normal:(0,0,1) ), //0
+    Vertex(Position: (1, 1, 1)  , Color: (0, 1, 0, 1), Normal:(0,0,1) ), //1
+    Vertex(Position: (-1, 1, 1) , Color: (0, 0, 1, 1), Normal:(0,0,1) ), //2
+    Vertex(Position: (-1, -1, 1), Color: (0, 0, 0, 1), Normal:(0,0,1) ), //3
     
-    Vertex(Position: (1, 1, -1) , Color: (1, 0, 0, 1), Normal:(0,0,-1) ),
-    Vertex(Position: (-1, -1, -1)  , Color: (0, 1, 0, 1), Normal:(0,0,-1) ),
-    Vertex(Position: (1, -1, -1) , Color: (0, 0, 1, 1), Normal:(0,0,-1) ),
-    Vertex(Position: (-1, 1, -1), Color: (0, 0, 0, 1), Normal:(0,0,-1) ),
+    Vertex(Position: (1, 1, -1) , Color: (1, 0, 0, 1), Normal:(0,0,-1) ), //4
+    Vertex(Position: (-1, -1, -1)  , Color: (0, 1, 0, 1), Normal:(0,0,-1) ), //5
+    Vertex(Position: (1, -1, -1) , Color: (0, 0, 1, 1), Normal:(0,0,-1) ), //6
+    Vertex(Position: (-1, 1, -1), Color: (0, 0, 0, 1), Normal:(0,0,-1) ), //7
     
-    Vertex(Position: (-1, -1, 1) , Color: (1, 0, 0, 1), Normal:(-1,0,1) ),
-    Vertex(Position: (-1, 1, 1)  , Color: (0, 1, 0, 1), Normal:(-1,0,1) ),
-    Vertex(Position: (-1, 1, -1) , Color: (0, 0, 1, 1), Normal:(-1,0,1) ),
-    Vertex(Position: (-1, -1, -1), Color: (0, 0, 0, 1), Normal:(0-1,0,1) ),
+    Vertex(Position: (-1, -1, 1) , Color: (1, 0, 0, 1), Normal:(-1,0,1) ), //8
+    Vertex(Position: (-1, 1, 1)  , Color: (0, 1, 0, 1), Normal:(-1,0,1) ), //9
+    Vertex(Position: (-1, 1, -1) , Color: (0, 0, 1, 1), Normal:(-1,0,1) ), //10
+    Vertex(Position: (-1, -1, -1), Color: (0, 0, 0, 1), Normal:(0-1,0,1) ), //11
     
-    Vertex(Position: (1, -1, -1) , Color: (1, 0, 0, 1), Normal:(1,0,1) ),
-    Vertex(Position: (1, 1, -1)  , Color: (0, 1, 0, 1), Normal:(1,0,1) ),
-    Vertex(Position: (1, 1, 1) , Color: (0, 0, 1, 1), Normal:(1,0,1) ),
-    Vertex(Position: (1, -1, 1), Color: (0, 0, 0, 1), Normal:(1,0,1) ),
+    Vertex(Position: (1, -1, -1) , Color: (1, 0, 0, 1), Normal:(1,0,1) ), // 12
+    Vertex(Position: (1, 1, -1)  , Color: (0, 1, 0, 1), Normal:(1,0,1) ), //13
+    Vertex(Position: (1, 1, 1) , Color: (0, 0, 1, 1), Normal:(1,0,1) ), //14
+    Vertex(Position: (1, -1, 1), Color: (0, 0, 0, 1), Normal:(1,0,1) ), //15
     
-    Vertex(Position: (1, 1, 1) , Color: (1, 0, 0, 1), Normal:(0,1,0) ),
-    Vertex(Position: (1, 1, -1)  , Color: (0, 1, 0, 1), Normal:(0,1,0) ),
-    Vertex(Position: (-1, 1, -1) , Color: (0, 0, 1, 1), Normal:(0,1,0) ),
-    Vertex(Position: (-1, 1, 1), Color: (0, 0, 0, 1), Normal:(0,1,0) ),
+    Vertex(Position: (1, 1, 1) , Color: (1, 0, 0, 1), Normal:(0,1,0) ), //16
+    Vertex(Position: (1, 1, -1)  , Color: (0, 1, 0, 1), Normal:(0,1,0) ), //17
+    Vertex(Position: (-1, 1, -1) , Color: (0, 0, 1, 1), Normal:(0,1,0) ), // 18
+    Vertex(Position: (-1, 1, 1), Color: (0, 0, 0, 1), Normal:(0,1,0) ), //19
     
-    Vertex(Position: (1, -1, -1) , Color: (1, 0, 0, 1), Normal:(0,-1,0) ),
-    Vertex(Position: (1, -1, 1)  , Color: (0, 1, 0, 1), Normal:(0,-1,0) ),
-    Vertex(Position: (-1, -1, 1) , Color: (0, 0, 1, 1), Normal:(0,-1,0) ),
-    Vertex(Position: (-1, -1, -1), Color: (0, 0, 0, 1), Normal:(0,-1,0) )
+    Vertex(Position: (1, -1, -1) , Color: (1, 0, 0, 1), Normal:(0,-1,0) ), //20
+    Vertex(Position: (1, -1, 1)  , Color: (0, 1, 0, 1), Normal:(0,-1,0) ), //21
+    Vertex(Position: (-1, -1, 1) , Color: (0, 0, 1, 1), Normal:(0,-1,0) ), //22
+    Vertex(Position: (-1, -1, -1), Color: (0, 0, 0, 1), Normal:(0,-1,0) ) //23
 ]
 var Indices: [GLubyte] = [
     // Front
@@ -181,29 +181,31 @@ class CubeView: GLKView {
     func resize(){
             
         if self.controller != nil {
-            self.camera = SphereCamera(width: self.frame.width, height: self.frame.height, fieldOfView: 60, near: 2, far: 30, target: GLKVector3Make(0, 0, 0))
+            self.camera = SphereCamera(width: self.frame.width, height: self.frame.height, fieldOfView: 60, near: 5, far: 20, target: GLKVector3Make(0, 0, 0))
             self.cubeEffect.transform.projectionMatrix = self.camera.projection
         }
     }
     
-    func intersectsTriangle(position:GLKVector3, ray:GLKVector3, a: GLKVector3, b: GLKVector3, c: GLKVector3) -> (intersect:Bool, result:GLKVector3?){
+    func intersectsTriangle(near:GLKVector3, far:GLKVector3, a: GLKVector3, b: GLKVector3, c: GLKVector3, normal:GLKVector3) -> (intersect:Bool, result:GLKVector3?){
         //follow http://sarvanz.blogspot.com/2012/03/probing-using-ray-casting-in-opengl.html
-        let u = GLKVector3Subtract(b, a)
-        let v = GLKVector3Subtract(c, a)
-        let normal = GLKVector3CrossProduct(u, v)
+        
+        let ray = GLKVector3Subtract(far, near)
+//        let u = GLKVector3Subtract(b, a)
+//        let v = GLKVector3Subtract(c, b)
+//        let normal = GLKVector3Normalize(GLKVector3CrossProduct(u, v))
         let nDotL = GLKVector3DotProduct(normal, ray)
-        //是否跟三角面在同一平面
-        if (nDotL > -0.00001 && nDotL < 0.00001) {
+        //是否跟三角面在同一平面或者背对三角面
+        if nDotL <= 0 {
             return (intersect:false, result:nil)
         }
         
-        let d = GLKVector3DotProduct(normal, GLKVector3Subtract(a, position)) / nDotL
-        //是否背对三角面
+        let d = GLKVector3DotProduct(normal, GLKVector3Subtract(a, near)) / nDotL
+//        //是否在最近点和最远点之外
         if (d < 0 || d > 1) {
             return (intersect:false, result:nil)
         }
         
-        let p = GLKVector3Add(position, GLKVector3MultiplyScalar(ray, d))
+        let p = GLKVector3Add(near, GLKVector3MultiplyScalar(ray, d))
         let n1 = GLKVector3CrossProduct( GLKVector3Subtract(b, a),  GLKVector3Subtract(p, a))
         let n2 = GLKVector3CrossProduct( GLKVector3Subtract(c, b),  GLKVector3Subtract(p, b))
         let n3 = GLKVector3CrossProduct( GLKVector3Subtract(a, c),  GLKVector3Subtract(p, c))
@@ -230,7 +232,7 @@ class CubeView: GLKView {
         // convert fovy to radians
         let rad = self.camera.fov * PI / 180
         let vLength = tan( rad / 2 ) * self.camera.near
-        let hLength = vLength * width / height
+        let hLength = vLength * (width / height)
         
         vVector3 = GLKVector3MultiplyScalar(vVector3, vLength)
         hVector3 = GLKVector3MultiplyScalar(hVector3, hLength)
@@ -239,8 +241,10 @@ class CubeView: GLKView {
         // of the view port
         var xPoint = x - width / 2
         var yPoint = y - height / 2
-        xPoint = xPoint/height * 2
-        yPoint = yPoint/height * 2
+        xPoint = xPoint/width * 2
+        yPoint = -yPoint/height * 2
+        
+        
         
         
         // compute direction of picking ray by subtracting intersection point
@@ -250,21 +254,24 @@ class CubeView: GLKView {
         
         // linear combination to compute intersection of picking ray with
         // view port plane
-        let position = GLKVector3Add(self.camera.position, direction)
+        let near = GLKVector3Add(self.camera.position, direction)
+        let far = GLKVector3Add(self.camera.position, GLKVector3MultiplyScalar(direction, self.camera.far / self.camera.near))
         
-        print("direction : " + String(direction.x) + " " + String(direction.y) + " " + String(direction.z))
-        print("position : " + String(position.x) + " " + String(position.y) + " " + String(position.z))
+        print("near : " + String(near.x) + " " + String(near.y) + " " + String(near.z))
+        print("far : " + String(far.x) + " " + String(far.y) + " " + String(far.z))
         
         for var index = 1; index <= Indices.count; index++ {
             if index != 1 && index % 3 == 0{
                 let aa = Vertices[Int(Indices[index-3])].Position
                 let bb = Vertices[Int(Indices[index-2])].Position
                 let cc = Vertices[Int(Indices[index-1])].Position
+                let nn = Vertices[Int(Indices[index-1])].Normal
                 let a = GLKVector3Make(aa.x, aa.y, aa.z)
                 let b = GLKVector3Make(bb.x, bb.y, bb.z)
                 let c = GLKVector3Make(cc.x, cc.y, cc.z)
+                let n = GLKVector3Make(nn.x, nn.y, nn.z)
 //                let data = intersectsTriangle(GLKVector3Make(0, 0, 8), ray:GLKVector3Make(0, 0, -20),  a: a, b: b, c: c)
-                let data = intersectsTriangle(position, ray:GLKVector3MultiplyScalar(direction, 100),  a: a, b: b, c: c)
+                let data = intersectsTriangle(near, far:far,  a: a, b: b, c: c, normal:n)
                 if data.intersect {
                     print(String( data.result!.x) + " " + String( data.result!.y) + " " + String( data.result!.z) + " ")
                 }
