@@ -15,7 +15,7 @@ import GLKit
 
 
 struct Vertex {
-    var Position: (CFloat, CFloat, CFloat)
+    var Position: (x:CFloat, y:CFloat, z:CFloat)
     var Color: (CFloat, CFloat, CFloat, CFloat)
     var Normal: (CFloat, CFloat, CFloat)
 }
@@ -103,20 +103,17 @@ extension Int {
 
 class CubeView: GLKView {
     
-    var _increasing:Bool = false
-    var _curRed:Float = 0.5
-    var _rotation:Float = 0
-    var _rotMatrix:GLKMatrix4 = GLKMatrix4Identity
-    var _quat:GLKQuaternion = GLKQuaternionMake(0, 0, 0, 1)
-    var _quatStart:GLKQuaternion = GLKQuaternionMake(0, 0, 0, 1)
-    var _anchor_position:GLKVector3!
-    var _current_position:GLKVector3!
+    var _anchor_position:CGPoint!
+    var _current_position:CGPoint!
+    var _beta:Float!
+    var _garma:Float!
     var indexBuffer: GLuint = GLuint()
     var vertexBuffer: GLuint = GLuint()
     var vertexArray: GLuint = GLuint()
     var cubeEffect = GLKBaseEffect()
     var controller:GLKViewController?
     var camera:SphereCamera!
+    var PI = Float(M_PI)
     
     required init?(coder aDecoder: NSCoder) {
         super.init(coder:aDecoder)
@@ -189,19 +186,105 @@ class CubeView: GLKView {
         }
     }
     
+    func intersectsTriangle(position:GLKVector3, ray:GLKVector3, a: GLKVector3, b: GLKVector3, c: GLKVector3) -> (intersect:Bool, result:GLKVector3?){
+        //follow http://sarvanz.blogspot.com/2012/03/probing-using-ray-casting-in-opengl.html
+        let u = GLKVector3Subtract(b, a)
+        let v = GLKVector3Subtract(c, a)
+        let normal = GLKVector3CrossProduct(u, v)
+        let nDotL = GLKVector3DotProduct(normal, ray)
+        //是否跟三角面在同一平面
+        if (nDotL > -0.00001 && nDotL < 0.00001) {
+            return (intersect:false, result:nil)
+        }
+        
+        let d = GLKVector3DotProduct(normal, GLKVector3Subtract(a, position)) / nDotL
+        //是否背对三角面
+        if (d < 0 || d > 1) {
+            return (intersect:false, result:nil)
+        }
+        
+        let p = GLKVector3Add(position, GLKVector3MultiplyScalar(ray, d))
+        let n1 = GLKVector3CrossProduct( GLKVector3Subtract(b, a),  GLKVector3Subtract(p, a))
+        let n2 = GLKVector3CrossProduct( GLKVector3Subtract(c, b),  GLKVector3Subtract(p, b))
+        let n3 = GLKVector3CrossProduct( GLKVector3Subtract(a, c),  GLKVector3Subtract(p, c))
+        
+        if GLKVector3DotProduct(normal, n1) >= 0 &&
+            GLKVector3DotProduct(normal, n2) >= 0 &&
+            GLKVector3DotProduct(normal, n3) >= 0{
+                return (intersect:true, result:p)
+        }else{
+            return (intersect:false, result:nil)
+        }
+    }
+    
+    func pick(x x:Float, y:Float){
+        
+        //follow http://schabby.de/picking-opengl-ray-tracing/
+        let viewVector3 = GLKVector3Normalize(GLKVector3Subtract(self.camera.target, self.camera.position))
+        var hVector3 = GLKVector3Normalize(GLKVector3CrossProduct(viewVector3, self.camera.up))
+        var vVector3 = GLKVector3Normalize(GLKVector3CrossProduct(hVector3, viewVector3))
+        
+        let width = Float(self.camera.width)
+        let height = Float(self.camera.height)
+        
+        // convert fovy to radians
+        let rad = self.camera.fov * PI / 180
+        let vLength = tan( rad / 2 ) * self.camera.near
+        let hLength = vLength * width / height
+        
+        vVector3 = GLKVector3MultiplyScalar(vVector3, vLength)
+        hVector3 = GLKVector3MultiplyScalar(hVector3, hLength)
+        
+        // translate mouse coordinates so that the origin lies in the center
+        // of the view port
+        var xPoint = x - width / 2
+        var yPoint = y - height / 2
+        xPoint = xPoint/height * 2
+        yPoint = yPoint/height * 2
+        
+        
+        // compute direction of picking ray by subtracting intersection point
+        
+        var direction = GLKVector3Add(GLKVector3MultiplyScalar(viewVector3, self.camera.near), GLKVector3MultiplyScalar(hVector3, xPoint))
+        direction = GLKVector3Add(direction, GLKVector3MultiplyScalar(vVector3, yPoint))
+        
+        // linear combination to compute intersection of picking ray with
+        // view port plane
+        let position = GLKVector3Add(self.camera.position, direction)
+        
+        print("direction : " + String(direction.x) + " " + String(direction.y) + " " + String(direction.z))
+        print("position : " + String(position.x) + " " + String(position.y) + " " + String(position.z))
+        
+        for var index = 1; index <= Indices.count; index++ {
+            if index != 1 && index % 3 == 0{
+                let aa = Vertices[Int(Indices[index-3])].Position
+                let bb = Vertices[Int(Indices[index-2])].Position
+                let cc = Vertices[Int(Indices[index-1])].Position
+                let a = GLKVector3Make(aa.x, aa.y, aa.z)
+                let b = GLKVector3Make(bb.x, bb.y, bb.z)
+                let c = GLKVector3Make(cc.x, cc.y, cc.z)
+//                let data = intersectsTriangle(GLKVector3Make(0, 0, 8), ray:GLKVector3Make(0, 0, -20),  a: a, b: b, c: c)
+                let data = intersectsTriangle(position, ray:GLKVector3MultiplyScalar(direction, 100),  a: a, b: b, c: c)
+                if data.intersect {
+                    print(String( data.result!.x) + " " + String( data.result!.y) + " " + String( data.result!.z) + " ")
+                }
+            }
+        }
+        
+        
+    }
+    
     override func touchesBegan(touchSet: Set<UITouch>, withEvent event: UIEvent!) {
         //        self.paused = !self.paused
         
         let touches = Array(touchSet)
         if touches.count >= 1{
             let touch:UITouch = touches.first!
-            let point:CGPoint = touch.locationInView(self)
-            
-            
-            _anchor_position = projectOntoSurface(Float(self.frame.size.width), Float(self.frame.size.height), GLKVector3Make(Float(point.x), Float(point.y), 0))
-            
-            _quatStart = _quat;
+            _anchor_position = touch.locationInView(self)
             _current_position = _anchor_position
+            _beta = self.camera.beta
+            _garma = self.camera.garma
+            pick(x: Float(_anchor_position.x), y: Float(_anchor_position.y))
         }
         
     }
@@ -212,29 +295,18 @@ class CubeView: GLKView {
         let touches = Array(touchSet)
         if touches.count >= 1{
             let touch:UITouch = touches.first!
-            let point:CGPoint = touch.locationInView(self)
-            let lastPoint:CGPoint = touch.previousLocationInView(self)
-            let diff = CGPointMake(lastPoint.x - point.x, lastPoint.y - point.y)
+            _current_position = touch.locationInView(self)
+            let diff = CGPointMake(_current_position.x - _anchor_position.x, _current_position.y - _anchor_position.y)
+            let beta = GLKMathDegreesToRadians(Float(diff.y) / 2.0);
+            let garma = GLKMathDegreesToRadians(Float(diff.x) / 2.0);
+            
+            self.camera.update(beta: _beta + beta, garma: _garma + garma)
             
             
-            let rotX = -1 * GLKMathDegreesToRadians(Float(diff.y) / 2.0);
-            let rotY = -1 * GLKMathDegreesToRadians(Float(diff.x) / 2.0);
-            
-            
-            let xAxis = GLKVector3Make(1, 0, 0);
-            let yAxis = GLKVector3Make(0, 1, 0);
-            _rotMatrix = GLKMatrix4Rotate(_rotMatrix, rotX, xAxis.x, xAxis.y, xAxis.z);
-            _rotMatrix = GLKMatrix4Rotate(_rotMatrix, rotY, yAxis.x, yAxis.y, yAxis.z);
-            
-            
-            _current_position = projectOntoSurface(Float(self.frame.size.width), Float(self.frame.size.height), GLKVector3Make(Float(point.x), Float(point.y), 0))
-            
-            
-            
-            _quat = GLKQuaternionMultiply(computeQuaternion(_anchor_position, _current_position), _quatStart);
         }
         
     }
+    
     
     
     override func drawRect(rect:CGRect){
@@ -242,10 +314,9 @@ class CubeView: GLKView {
             
             self.cubeEffect.prepareToDraw()
             
-            
-            var modelViewMatrix = GLKMatrix4MakeTranslation(0.0, 0.0, -15.0)
-            modelViewMatrix = GLKMatrix4Multiply(modelViewMatrix, GLKMatrix4MakeWithQuaternion(_quat))
-            self.cubeEffect.transform.modelviewMatrix = modelViewMatrix
+//            var modelViewMatrix = GLKMatrix4MakeTranslation(0.0, 0.0, 0.0)
+//            modelViewMatrix = GLKMatrix4Multiply(modelViewMatrix, self.camera.view)
+            self.cubeEffect.transform.modelviewMatrix = self.camera.view
             
             
             glClearColor(1, 1, 1, 1.0);

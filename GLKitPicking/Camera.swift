@@ -111,15 +111,39 @@ class SphereCamera : AbstractCamera {
     init (width: CGFloat, height: CGFloat, fieldOfView: GLfloat, near: GLfloat, far: GLfloat, target:GLKVector3){
         super.init(width: width, height: height, fieldOfView: fieldOfView, near: near, far: far)
         self.target = target
-        update(beta: self.beta, garma: self.garma, target: self.target)
+        update(beta: self.beta, garma: self.garma, radius: self.radius, target: self.target)
     }
     
+    func update(beta beta:Float, garma:Float){
+        update(beta: beta, garma: garma, radius: self.radius, target: self.target)
+    }
     
-    func update(beta beta:Float, garma:Float, target:GLKVector3){
+    func update(beta beta:Float){
+        update(beta: beta, garma: self.garma, radius: self.radius, target: self.target)
+    }
+    
+    func update(garma garma:Float){
+        update(beta: beta, garma: garma, radius: self.radius, target: self.target)
+    }
+    
+    func update(radius radius:Float){
+        update(beta: beta, garma: garma, radius: radius, target: self.target)
+    }
+    
+    func update(target target:GLKVector3){
+        update(beta: beta, garma: garma, radius: radius, target: target)
+    }
+    
+    func update(beta beta:Float, garma:Float, radius:Float, target:GLKVector3){
         
         let x:Float = radius * Float(sin(beta - PI/2)) * Float(sin(PI - garma)) + target.x
         let y:Float = radius * Float(cos(beta - PI/2)) + target.y
         let z:Float = radius * Float(sin(beta - PI/2)) * Float(cos(PI - garma)) + target.z
+        
+        self.radius = radius
+        self.beta = beta
+        self.garma = garma
+        self.target = target
         
         position = GLKVector3Make(x,y,z)
         
@@ -132,9 +156,19 @@ class AbstractCamera : NSObject {
     
     var projection:GLKMatrix4!
     var view:GLKMatrix4!
+    var fov:GLfloat!
+    var width:CGFloat!
+    var height:CGFloat!
+    var near:GLfloat!
+    var far:GLfloat!
     
     init (width:CGFloat, height:CGFloat, fieldOfView:GLfloat, near:GLfloat, far:GLfloat){
         super.init()
+        self.fov = fieldOfView
+        self.width = width
+        self.height = height
+        self.near = near
+        self.far = far
         self.projection = GLKMatrix4MakePerspective(GLKMathDegreesToRadians(fieldOfView), GLfloat(width/height), near, far)
     }
 }
