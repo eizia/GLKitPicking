@@ -31,15 +31,15 @@ var Vertices = [
     Vertex(Position: (1, -1, -1) , Color: (0, 0, 1, 1), Normal:(0,0,-1) ), //6
     Vertex(Position: (-1, 1, -1), Color: (0, 0, 0, 1), Normal:(0,0,-1) ), //7
     
-    Vertex(Position: (-1, -1, 1) , Color: (1, 0, 0, 1), Normal:(-1,0,1) ), //8
-    Vertex(Position: (-1, 1, 1)  , Color: (0, 1, 0, 1), Normal:(-1,0,1) ), //9
-    Vertex(Position: (-1, 1, -1) , Color: (0, 0, 1, 1), Normal:(-1,0,1) ), //10
-    Vertex(Position: (-1, -1, -1), Color: (0, 0, 0, 1), Normal:(0-1,0,1) ), //11
+    Vertex(Position: (-1, -1, 1) , Color: (1, 0, 0, 1), Normal:(-1,0,0) ), //8
+    Vertex(Position: (-1, 1, 1)  , Color: (0, 1, 0, 1), Normal:(-1,0,0) ), //9
+    Vertex(Position: (-1, 1, -1) , Color: (0, 0, 1, 1), Normal:(-1,0,0) ), //10
+    Vertex(Position: (-1, -1, -1), Color: (0, 0, 0, 1), Normal:(-1,0,0) ), //11
     
-    Vertex(Position: (1, -1, -1) , Color: (1, 0, 0, 1), Normal:(1,0,1) ), // 12
-    Vertex(Position: (1, 1, -1)  , Color: (0, 1, 0, 1), Normal:(1,0,1) ), //13
-    Vertex(Position: (1, 1, 1) , Color: (0, 0, 1, 1), Normal:(1,0,1) ), //14
-    Vertex(Position: (1, -1, 1), Color: (0, 0, 0, 1), Normal:(1,0,1) ), //15
+    Vertex(Position: (1, -1, -1) , Color: (1, 0, 0, 1), Normal:(1,0,0) ), // 12
+    Vertex(Position: (1, 1, -1)  , Color: (0, 1, 0, 1), Normal:(1,0,0) ), //13
+    Vertex(Position: (1, 1, 1) , Color: (0, 0, 1, 1), Normal:(1,0,0) ), //14
+    Vertex(Position: (1, -1, 1), Color: (0, 0, 0, 1), Normal:(1,0,0) ), //15
     
     Vertex(Position: (1, 1, 1) , Color: (1, 0, 0, 1), Normal:(0,1,0) ), //16
     Vertex(Position: (1, 1, -1)  , Color: (0, 1, 0, 1), Normal:(0,1,0) ), //17
@@ -58,16 +58,16 @@ var Indices: [GLubyte] = [
     // Back
     4, 6, 5,
     4, 5, 7,
-    // Left
+//    // Left
     8, 9, 10,
     10, 11, 8,
-    // Right 
+//    // Right
     12, 13, 14,
     14, 15, 12,
-    // Top
+//    // Top
     16, 17, 18,
     18, 19, 16,
-    // Bottom 
+//    // Bottom
     20, 21, 22,
     22, 23, 20
 ]
@@ -195,7 +195,7 @@ class CubeView: GLKView {
 //        let normal = GLKVector3Normalize(GLKVector3CrossProduct(u, v))
         let nDotL = GLKVector3DotProduct(normal, ray)
         //是否跟三角面在同一平面或者背对三角面
-        if nDotL <= 0 {
+        if nDotL >= 0 {
             return (intersect:false, result:nil)
         }
         
@@ -257,8 +257,8 @@ class CubeView: GLKView {
         let near = GLKVector3Add(self.camera.position, direction)
         let far = GLKVector3Add(self.camera.position, GLKVector3MultiplyScalar(direction, self.camera.far / self.camera.near))
         
-        print("near : " + String(near.x) + " " + String(near.y) + " " + String(near.z))
-        print("far : " + String(far.x) + " " + String(far.y) + " " + String(far.z))
+//        print("near : " + String(near.x) + " " + String(near.y) + " " + String(near.z))
+//        print("far : " + String(far.x) + " " + String(far.y) + " " + String(far.z))
         
         for var index = 1; index <= Indices.count; index++ {
             if index != 1 && index % 3 == 0{
