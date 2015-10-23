@@ -8,8 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		6D6CA58B1BD7C97300F9FDB1 /* GLKView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D6CA58A1BD7C97300F9FDB1 /* GLKView.swift */; settings = {ASSET_TAGS = (); }; };
-		6D6CA58D1BD8794800F9FDB1 /* GLKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6D6CA58C1BD8794800F9FDB1 /* GLKit.framework */; };
-		6D6CA58F1BD8795000F9FDB1 /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6D6CA58E1BD8795000F9FDB1 /* OpenGLES.framework */; };
 		6D94B5371BD8B21300182D3A /* Camera.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D94B5361BD8B21300182D3A /* Camera.swift */; settings = {ASSET_TAGS = (); }; };
 		6DC8DA591BD77EDD0096A576 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DC8DA581BD77EDD0096A576 /* AppDelegate.swift */; };
 		6DC8DA5B1BD77EDD0096A576 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DC8DA5A1BD77EDD0096A576 /* ViewController.swift */; };
@@ -39,8 +37,6 @@
 
 /* Begin PBXFileReference section */
 		6D6CA58A1BD7C97300F9FDB1 /* GLKView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GLKView.swift; sourceTree = "<group>"; };
-		6D6CA58C1BD8794800F9FDB1 /* GLKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLKit.framework; path = System/Library/Frameworks/GLKit.framework; sourceTree = SDKROOT; };
-		6D6CA58E1BD8795000F9FDB1 /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
 		6D94B5361BD8B21300182D3A /* Camera.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Camera.swift; sourceTree = "<group>"; };
 		6DC8DA551BD77EDD0096A576 /* GLKitPicking.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GLKitPicking.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6DC8DA581BD77EDD0096A576 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -62,8 +58,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				6D6CA58F1BD8795000F9FDB1 /* OpenGLES.framework in Frameworks */,
-				6D6CA58D1BD8794800F9FDB1 /* GLKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -87,8 +81,6 @@
 		6DC8DA4C1BD77EDD0096A576 = {
 			isa = PBXGroup;
 			children = (
-				6D6CA58E1BD8795000F9FDB1 /* OpenGLES.framework */,
-				6D6CA58C1BD8794800F9FDB1 /* GLKit.framework */,
 				6DC8DA571BD77EDD0096A576 /* GLKitPicking */,
 				6DC8DA6C1BD77EDD0096A576 /* GLKitPickingTests */,
 				6DC8DA771BD77EDD0096A576 /* GLKitPickingUITests */,
@@ -414,6 +406,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				EMBEDDED_CONTENT_CONTAINS_SWIFT = YES;
 				INFOPLIST_FILE = GLKitPicking/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -426,6 +419,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				EMBEDDED_CONTENT_CONTAINS_SWIFT = YES;
 				INFOPLIST_FILE = GLKitPicking/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";

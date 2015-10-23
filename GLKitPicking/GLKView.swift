@@ -50,7 +50,9 @@ class CubeView: GLKView {
     var _beta:Float!
     var _garma:Float!
     var indexBuffer: GLuint = GLuint()
+    var indexBufferSize:Int = 36 * 4 * 1024
     var vertexBuffer: GLuint = GLuint()
+    var vertexBufferSize:Int = 24 * 40 * 1024
     var vertexArray: GLuint = GLuint()
     var cubeEffect = GLKBaseEffect()
     var controller:GLKViewController?
@@ -66,7 +68,7 @@ class CubeView: GLKView {
     ]
     var vertices:[Vertex]  = []
     var indices:[GLuint] = []
-
+    var appendIndex:Int = 0
     
     required init?(coder aDecoder: NSCoder) {
         super.init(coder:aDecoder)
@@ -96,21 +98,32 @@ class CubeView: GLKView {
         
         self.cubeEffect.colorMaterialEnabled = GLboolean(GL_TRUE)
         self.cubeEffect.light0.enabled = GLboolean(GL_TRUE)
-        self.cubeEffect.light0.position = GLKVector4Make(1, 1, 0, 1);
+        self.cubeEffect.light0.position = GLKVector4Make(0, 10, 0, 1)
         //        self.cubeEffect.light0.diffuseColor = GLKVector4Make(1, 1, 1, 1.0);
         //        self.cubeEffect.light0.ambientColor = GLKVector4Make(1, 1, 1, 1);
         //        self.cubeEffect.light0.specularColor = GLKVector4Make(0, 0, 0, 1);
         
-        vertices.appendContentsOf(genOneCubeVertices(GLKVector3Make(0, 0, 0), color: (1,0.5,0,1)))
-        indices.appendContentsOf(genOneCubeIndices(0))
-
-        glGenVertexArraysOES(1, &vertexArray);
-        glBindVertexArrayOES(vertexArray);
+//        vertices.appendContentsOf(genOneCubeVertices(GLKVector3Make(0, 0, 0), color: (1,0.5,0,1)))
+//        indices.appendContentsOf(genOneCubeIndices(0))
+//
         
+        
+//        
+//        for var index = 0; index < 1000; ++index {
+//            let ves = genOneCubeVertices(GLKVector3Make(Float(appendIndex % 10), Float(appendIndex%100 / 10), Float(appendIndex/100)), color: (Float(appendIndex % 10) / Float(10), Float(appendIndex % 100) / Float(100), Float(appendIndex)/1000, 1))
+//            let ins = genOneCubeIndices(appendIndex)
+//            vertices.appendContentsOf(ves)
+//            indices.appendContentsOf(ins)
+//            appendIndex++
+//        }
+        
+        
+        glGenVertexArraysOES(1, &vertexArray)
+        glBindVertexArrayOES(vertexArray)
         
         glGenBuffers(1, &vertexBuffer)
         glBindBuffer(GLenum(GL_ARRAY_BUFFER), vertexBuffer)
-        glBufferData(GLenum(GL_ARRAY_BUFFER), vertices.count * sizeof(Vertex), vertices, GLenum(GL_DYNAMIC_DRAW))
+        glBufferData(GLenum(GL_ARRAY_BUFFER), vertexBufferSize, vertices, GLenum(GL_DYNAMIC_DRAW))
         
         glEnableVertexAttribArray(GLuint(GLKVertexAttrib.Position.rawValue))
         glVertexAttribPointer(GLuint(GLKVertexAttrib.Position.rawValue), 3, GLenum(GL_FLOAT), GLboolean(UInt8(GL_FALSE)), GLsizei(sizeof(Vertex)), UnsafePointer<Int>(bitPattern: 0))
@@ -123,11 +136,22 @@ class CubeView: GLKView {
         
         glGenBuffers(1, &indexBuffer)
         glBindBuffer(GLenum(GL_ELEMENT_ARRAY_BUFFER), indexBuffer)
-        glBufferData(GLenum(GL_ELEMENT_ARRAY_BUFFER), indices.count * sizeof(GLuint), indices, GLenum(GL_DYNAMIC_DRAW))
+        glBufferData(GLenum(GL_ELEMENT_ARRAY_BUFFER), indexBufferSize, &indices, GLenum(GL_DYNAMIC_DRAW))
         
 
-        glBindVertexArrayOES(0);
+        glBindVertexArrayOES(0)
         
+        
+    }
+    
+    func pushVertexBuffer(cubeIndex:Int, number:Int){
+        glBufferSubData(GLenum(GL_ARRAY_BUFFER), GLintptr(cubeIndex * 24 * sizeof(Vertex)), GLsizeiptr(number * 24 * sizeof(Vertex)), &vertices + cubeIndex * 24 * sizeof(Vertex))
+        
+//        glBufferData(GLenum(GL_ARRAY_BUFFER), vertexBufferSize, vertices, GLenum(GL_DYNAMIC_DRAW))
+    }
+    func pushIndexBuffer(cubeIndex:Int, number:Int){
+        glBufferSubData(GLenum(GL_ELEMENT_ARRAY_BUFFER), cubeIndex * 36 * sizeof(GLuint), number * 36 * sizeof(GLuint), &indices + cubeIndex * 36 * sizeof(GLuint))
+//        glBufferData(GLenum(GL_ELEMENT_ARRAY_BUFFER), indexBufferSize, indices, GLenum(GL_DYNAMIC_DRAW))
     }
         
     func resize(){
@@ -177,7 +201,7 @@ class CubeView: GLKView {
         ]
     }
     
-    func genOneCubeIndices(index:GLushort) -> [GLuint]{
+    func genOneCubeIndices(index:Int) -> [GLuint]{
         let vertexCount = GLuint(index * 24)
         return [
             vertexCount, vertexCount+1, vertexCount+2,
@@ -301,6 +325,18 @@ class CubeView: GLKView {
             _beta = self.camera.beta
             _garma = self.camera.garma
             pick(x: Float(_anchor_position.x), y: Float(_anchor_position.y))
+            
+            let previousIndex = appendIndex
+            for var index = 0; index < 10; ++index {
+                let ves = genOneCubeVertices(GLKVector3Make(Float(appendIndex % 10), Float(appendIndex%100 / 10), Float(appendIndex/100)), color: (Float(appendIndex % 10) / Float(10), Float(appendIndex % 100) / Float(100), Float(appendIndex)/1000, 1))
+                let ins = genOneCubeIndices(appendIndex)
+                vertices.appendContentsOf(ves)
+                indices.appendContentsOf(ins)
+                appendIndex++
+            }
+            
+            pushVertexBuffer(previousIndex, number: 10)
+            pushIndexBuffer(previousIndex, number: 10)
         }
         
     }
