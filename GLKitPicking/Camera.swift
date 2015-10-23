@@ -17,17 +17,20 @@ import GLKit
 
 class SphereCamera : AbstractCamera {
     
-    var position : GLKVector3!
-    var target : GLKVector3!
-    var beta : Float = 0
-    var garma : Float = 0
-    var radius : Float = 10
     let PI = Float(M_PI)
+    var position : GLKVector3!
+    var beta : Float
+    var garma : Float
+    var radius : Float
+    var target :GLKVector3
     let up = GLKVector3Make(0.0, 1.0, 0.0)
     
-    init (width: CGFloat, height: CGFloat, fieldOfView: GLfloat, near: GLfloat, far: GLfloat, target:GLKVector3){
-        super.init(width: width, height: height, fieldOfView: fieldOfView, near: near, far: far)
+    init (width: CGFloat, height: CGFloat, fieldOfView: GLfloat = 60, near: GLfloat = 2, far: GLfloat = 50, beta:Float = 0, garma:Float = 0, radius:Float = 30, target:GLKVector3 = GLKVector3Make(0,0,0)){
         self.target = target
+        self.radius = radius
+        self.beta = beta
+        self.garma = garma
+        super.init(width: width, height: height, fieldOfView: fieldOfView, near: near, far: far)
         update(beta: self.beta, garma: self.garma, radius: self.radius, target: self.target)
     }
     
@@ -76,22 +79,22 @@ class SphereCamera : AbstractCamera {
 
 class AbstractCamera : NSObject {
     
-    var projection:GLKMatrix4!
+    var projection:GLKMatrix4
     var view:GLKMatrix4!
-    var fov:GLfloat!
-    var width:CGFloat!
-    var height:CGFloat!
-    var near:GLfloat!
-    var far:GLfloat!
+    var fov:GLfloat
+    var width:CGFloat
+    var height:CGFloat
+    var near:GLfloat
+    var far:GLfloat
     
     init (width:CGFloat, height:CGFloat, fieldOfView:GLfloat, near:GLfloat, far:GLfloat){
-        super.init()
         self.fov = fieldOfView
         self.width = width
         self.height = height
         self.near = near
         self.far = far
         self.projection = GLKMatrix4MakePerspective(GLKMathDegreesToRadians(fieldOfView), GLfloat(width/height), near, far)
+        super.init()
     }
 }
 

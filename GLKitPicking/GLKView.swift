@@ -12,74 +12,16 @@ import QuartzCore
 import OpenGLES
 import GLKit
 
-
-
 struct Vertex {
-    var Position: (x:CFloat, y:CFloat, z:CFloat)
-    var Color: (r:CFloat, g:CFloat, b:CFloat, a:CFloat)
-    var Normal: (x:CFloat, y:CFloat, z:CFloat)
+    var Position: (x:Float, y:Float, z:Float)
+    var Color:  (r:Float, g:Float, b:Float, a:Float)
+    var Normal:  (x:Float, y:Float, z:Float)
 }
-
-var Vertices = [
-    Vertex(Position: (1, -1, 1) , Color: (1, 0, 0, 1), Normal:(0,0,1) ), //0
-    Vertex(Position: (1, 1, 1)  , Color: (0, 1, 0, 1), Normal:(0,0,1) ), //1
-    Vertex(Position: (-1, 1, 1) , Color: (0, 0, 1, 1), Normal:(0,0,1) ), //2
-    Vertex(Position: (-1, -1, 1), Color: (0, 0, 0, 1), Normal:(0,0,1) ), //3
-    
-    Vertex(Position: (1, 1, -1) , Color: (1, 0, 0, 1), Normal:(0,0,-1) ), //4
-    Vertex(Position: (-1, -1, -1)  , Color: (0, 1, 0, 1), Normal:(0,0,-1) ), //5
-    Vertex(Position: (1, -1, -1) , Color: (0, 0, 1, 1), Normal:(0,0,-1) ), //6
-    Vertex(Position: (-1, 1, -1), Color: (0, 0, 0, 1), Normal:(0,0,-1) ), //7
-    
-    Vertex(Position: (-1, -1, 1) , Color: (1, 0, 0, 1), Normal:(-1,0,0) ), //8
-    Vertex(Position: (-1, 1, 1)  , Color: (0, 1, 0, 1), Normal:(-1,0,0) ), //9
-    Vertex(Position: (-1, 1, -1) , Color: (0, 0, 1, 1), Normal:(-1,0,0) ), //10
-    Vertex(Position: (-1, -1, -1), Color: (0, 0, 0, 1), Normal:(-1,0,0) ), //11
-    
-    Vertex(Position: (1, -1, -1) , Color: (1, 0, 0, 1), Normal:(1,0,0) ), // 12
-    Vertex(Position: (1, 1, -1)  , Color: (0, 1, 0, 1), Normal:(1,0,0) ), //13
-    Vertex(Position: (1, 1, 1) , Color: (0, 0, 1, 1), Normal:(1,0,0) ), //14
-    Vertex(Position: (1, -1, 1), Color: (0, 0, 0, 1), Normal:(1,0,0) ), //15
-    
-    Vertex(Position: (1, 1, 1) , Color: (1, 0, 0, 1), Normal:(0,1,0) ), //16
-    Vertex(Position: (1, 1, -1)  , Color: (0, 1, 0, 1), Normal:(0,1,0) ), //17
-    Vertex(Position: (-1, 1, -1) , Color: (0, 0, 1, 1), Normal:(0,1,0) ), // 18
-    Vertex(Position: (-1, 1, 1), Color: (0, 0, 0, 1), Normal:(0,1,0) ), //19
-    
-    Vertex(Position: (1, -1, -1) , Color: (1, 0, 0, 1), Normal:(0,-1,0) ), //20
-    Vertex(Position: (1, -1, 1)  , Color: (0, 1, 0, 1), Normal:(0,-1,0) ), //21
-    Vertex(Position: (-1, -1, 1) , Color: (0, 0, 1, 1), Normal:(0,-1,0) ), //22
-    Vertex(Position: (-1, -1, -1), Color: (0, 0, 0, 1), Normal:(0,-1,0) ) //23
-]
-var Indices: [GLubyte] = [
-    // Front
-    0, 1, 2,
-    2, 3, 0,
-    // Back
-    4, 6, 5,
-    4, 5, 7,
-//    // Left
-    8, 9, 10,
-    10, 11, 8,
-//    // Right
-    12, 13, 14,
-    14, 15, 12,
-//    // Top
-    16, 17, 18,
-    18, 19, 16,
-//    // Bottom
-    20, 21, 22,
-    22, 23, 20
-]
-
+func F3(x:Float, _ y:Float, _ z:Float) -> (x:Float, y:Float, z:Float){
+    return (x:x, y:y, z:z)
+}
 
 //helper extensions to pass arguments to GL land
-extension Array {
-    func size () -> Int {
-        return self.count * sizeofValue(self[0])
-    }
-}
-
 extension Int32 {
     func __conversion() -> GLenum {
         return GLuint(self)
@@ -114,6 +56,17 @@ class CubeView: GLKView {
     var controller:GLKViewController?
     var camera:SphereCamera!
     var PI = Float(M_PI)
+    let NORMAL:[String:(x:Float, y:Float, z:Float)] = [
+        "Y" : F3(0,1,0),
+        "-Y" : F3(0,-1,0),
+        "X" : F3(1,0,0),
+        "-X" : F3(-1,0,0),
+        "Z" : F3(0,0,1),
+        "-Z" : F3(0,0,-1)
+    ]
+    var vertices:[Vertex]  = []
+    var indices:[GLuint] = []
+
     
     required init?(coder aDecoder: NSCoder) {
         super.init(coder:aDecoder)
@@ -141,16 +94,15 @@ class CubeView: GLKView {
         EAGLContext.setCurrentContext(self.context)
         glEnable(GLenum(GL_CULL_FACE))
         
-        
-        self.cubeEffect.light0.enabled = GLboolean(GL_TRUE);
-        self.cubeEffect.light0.diffuseColor = GLKVector4Make(1, 1, 1, 1.0);
+        self.cubeEffect.colorMaterialEnabled = GLboolean(GL_TRUE)
+        self.cubeEffect.light0.enabled = GLboolean(GL_TRUE)
         self.cubeEffect.light0.position = GLKVector4Make(1, 1, 0, 1);
-        self.cubeEffect.light0.diffuseColor = GLKVector4Make(0, 1, 1, 1);
-        self.cubeEffect.light0.ambientColor = GLKVector4Make(0, 0, 0, 1);
-        self.cubeEffect.light0.specularColor = GLKVector4Make(0, 0, 0, 1);
+        //        self.cubeEffect.light0.diffuseColor = GLKVector4Make(1, 1, 1, 1.0);
+        //        self.cubeEffect.light0.ambientColor = GLKVector4Make(1, 1, 1, 1);
+        //        self.cubeEffect.light0.specularColor = GLKVector4Make(0, 0, 0, 1);
         
-
-        
+        vertices.appendContentsOf(genOneCubeVertices(GLKVector3Make(0, 0, 0), color: (1,0.5,0,1)))
+        indices.appendContentsOf(genOneCubeIndices(0))
 
         glGenVertexArraysOES(1, &vertexArray);
         glBindVertexArrayOES(vertexArray);
@@ -158,20 +110,20 @@ class CubeView: GLKView {
         
         glGenBuffers(1, &vertexBuffer)
         glBindBuffer(GLenum(GL_ARRAY_BUFFER), vertexBuffer)
-        glBufferData(GLenum(GL_ARRAY_BUFFER), Vertices.size(), Vertices, GLenum(GL_DYNAMIC_DRAW))
+        glBufferData(GLenum(GL_ARRAY_BUFFER), vertices.count * sizeof(Vertex), vertices, GLenum(GL_DYNAMIC_DRAW))
         
         glEnableVertexAttribArray(GLuint(GLKVertexAttrib.Position.rawValue))
         glVertexAttribPointer(GLuint(GLKVertexAttrib.Position.rawValue), 3, GLenum(GL_FLOAT), GLboolean(UInt8(GL_FALSE)), GLsizei(sizeof(Vertex)), UnsafePointer<Int>(bitPattern: 0))
         
         glEnableVertexAttribArray(GLuint(GLKVertexAttrib.Color.rawValue))
-        glVertexAttribPointer(GLuint(GLKVertexAttrib.Color.rawValue), 4, GLenum(GL_FLOAT), GLboolean(UInt8(GL_FALSE)), GLsizei(sizeof(Vertex)),  UnsafePointer<Int>(bitPattern: sizeof(CFloat) * 3))
+        glVertexAttribPointer(GLuint(GLKVertexAttrib.Color.rawValue), 4, GLenum(GL_FLOAT), GLboolean(UInt8(GL_FALSE)), GLsizei(sizeof(Vertex)),  UnsafePointer<Int>(bitPattern: sizeof(Float) * 3))
         
         glEnableVertexAttribArray(GLuint(GLKVertexAttrib.Normal.rawValue))
-        glVertexAttribPointer(GLuint(GLKVertexAttrib.Normal.rawValue), 3, GLenum(GL_FLOAT), GLboolean(UInt8(GL_FALSE)), GLsizei(sizeof(Vertex)),  UnsafePointer<Int>(bitPattern: sizeof(CFloat) * 7))
+        glVertexAttribPointer(GLuint(GLKVertexAttrib.Normal.rawValue), 3, GLenum(GL_FLOAT), GLboolean(UInt8(GL_FALSE)), GLsizei(sizeof(Vertex)),  UnsafePointer<Int>(bitPattern: sizeof(Float) * 7))
         
         glGenBuffers(1, &indexBuffer)
         glBindBuffer(GLenum(GL_ELEMENT_ARRAY_BUFFER), indexBuffer)
-        glBufferData(GLenum(GL_ELEMENT_ARRAY_BUFFER), Indices.size(), Indices, GLenum(GL_DYNAMIC_DRAW))
+        glBufferData(GLenum(GL_ELEMENT_ARRAY_BUFFER), indices.count * sizeof(GLuint), indices, GLenum(GL_DYNAMIC_DRAW))
         
 
         glBindVertexArrayOES(0);
@@ -181,18 +133,77 @@ class CubeView: GLKView {
     func resize(){
             
         if self.controller != nil {
-            self.camera = SphereCamera(width: self.frame.width, height: self.frame.height, fieldOfView: 60, near: 5, far: 20, target: GLKVector3Make(0, 0, 0))
+            self.camera = SphereCamera(width: self.frame.width, height: self.frame.height)
             self.cubeEffect.transform.projectionMatrix = self.camera.projection
         }
+    }
+    
+    
+    func genOneCubeVertices(position:GLKVector3, color:(r:Float, g:Float, b:Float, a:Float)) -> [Vertex]{
+        
+        let x = position.x
+        let y = position.y
+        let z = position.z
+        return [
+            Vertex(Position: F3(x+0.5, y-0.5, z+0.5) ,   Color: color, Normal:NORMAL["Z"]! ), //0
+            Vertex(Position: F3(x+0.5, y+0.5, z+0.5)  ,  Color: color, Normal:NORMAL["Z"]! ), //1
+            Vertex(Position: F3(x-0.5, y+0.5, z+0.5) ,   Color: color, Normal:NORMAL["Z"]! ), //2
+            Vertex(Position: F3(x-0.5, y-0.5, z+0.5),    Color: color, Normal:NORMAL["Z"]! ), //3
+            
+            Vertex(Position: F3(x+0.5, y+0.5, z-0.5) ,   Color: color, Normal:NORMAL["-Z"]! ), //4
+            Vertex(Position: F3(x-0.5, y-0.5, z-0.5),    Color: color, Normal:NORMAL["-Z"]! ), //5
+            Vertex(Position: F3(x+0.5, y-0.5, z-0.5) ,   Color: color, Normal:NORMAL["-Z"]! ), //6
+            Vertex(Position: F3(x-0.5, y+0.5, z-0.5),    Color: color, Normal:NORMAL["-Z"]! ), //7
+            
+            Vertex(Position: F3(x-0.5, y-0.5, z+0.5),    Color: color, Normal:NORMAL["-X"]! ), //8
+            Vertex(Position: F3(x-0.5, y+0.5, z+0.5)  ,  Color: color, Normal:NORMAL["-X"]! ), //9
+            Vertex(Position: F3(x-0.5, y+0.5, z-0.5) ,   Color: color, Normal:NORMAL["-X"]! ), //10
+            Vertex(Position: F3(x-0.5, y-0.5, z-0.5),    Color: color, Normal:NORMAL["-X"]! ), //11
+            
+            Vertex(Position: F3(x+0.5, y-0.5, z-0.5) ,   Color: color, Normal:NORMAL["X"]! ), // 12
+            Vertex(Position: F3(x+0.5, y+0.5, z-0.5)  ,  Color: color, Normal:NORMAL["X"]! ), //13
+            Vertex(Position: F3(x+0.5, y+0.5, z+0.5),    Color: color, Normal:NORMAL["X"]! ), //14
+            Vertex(Position: F3(x+0.5, y-0.5, z+0.5),    Color: color, Normal:NORMAL["X"]! ), //15
+            
+            Vertex(Position: F3(x+0.5, y+0.5, z+0.5),    Color: color, Normal:NORMAL["Y"]!), //16
+            Vertex(Position: F3(x+0.5, y+0.5, z-0.5) ,   Color: color, Normal:NORMAL["Y"]! ), //17
+            Vertex(Position: F3(x-0.5, y+0.5, z-0.5),    Color: color, Normal:NORMAL["Y"]! ), // 18
+            Vertex(Position: F3(x-0.5, y+0.5, z+0.5),    Color: color, Normal:NORMAL["Y"]! ), //19
+            
+            Vertex(Position: F3(x+0.5, y-0.5, z-0.5) ,   Color: color, Normal:NORMAL["-Y"]! ), //20
+            Vertex(Position: F3(x+0.5, y-0.5, z+0.5) ,   Color: color, Normal:NORMAL["-Y"]! ), //21
+            Vertex(Position: F3(x-0.5, y-0.5, z+0.5),    Color: color, Normal:NORMAL["-Y"]! ), //22
+            Vertex(Position: F3(x-0.5, y-0.5, z-0.5),    Color: color, Normal:NORMAL["-Y"]! ) //23
+        ]
+    }
+    
+    func genOneCubeIndices(index:GLushort) -> [GLuint]{
+        let vertexCount = GLuint(index * 24)
+        return [
+            vertexCount, vertexCount+1, vertexCount+2,
+            vertexCount+2, vertexCount+3, vertexCount,
+            
+            vertexCount+4, vertexCount+6, vertexCount+5,
+            vertexCount+4, vertexCount+5, vertexCount+7,
+            
+            vertexCount+8, vertexCount+9, vertexCount+10,
+            vertexCount+10, vertexCount+11, vertexCount+8,
+            
+            vertexCount+12, vertexCount+13, vertexCount+14,
+            vertexCount+14, vertexCount+15, vertexCount+12,
+            
+            vertexCount+16, vertexCount+17, vertexCount+18,
+            vertexCount+18, vertexCount+19, vertexCount+16,
+            
+            vertexCount+20, vertexCount+21, vertexCount+22,
+            vertexCount+22, vertexCount+23, vertexCount+20
+        ]
     }
     
     func intersectsTriangle(near:GLKVector3, far:GLKVector3, a: GLKVector3, b: GLKVector3, c: GLKVector3, normal:GLKVector3) -> (intersect:Bool, result:GLKVector3?){
         //follow http://sarvanz.blogspot.com/2012/03/probing-using-ray-casting-in-opengl.html
         
         let ray = GLKVector3Subtract(far, near)
-//        let u = GLKVector3Subtract(b, a)
-//        let v = GLKVector3Subtract(c, b)
-//        let normal = GLKVector3Normalize(GLKVector3CrossProduct(u, v))
         let nDotL = GLKVector3DotProduct(normal, ray)
         //是否跟三角面在同一平面或者背对三角面
         if nDotL >= 0 {
@@ -200,7 +211,7 @@ class CubeView: GLKView {
         }
         
         let d = GLKVector3DotProduct(normal, GLKVector3Subtract(a, near)) / nDotL
-//        //是否在最近点和最远点之外
+        //是否在最近点和最远点之外
         if (d < 0 || d > 1) {
             return (intersect:false, result:nil)
         }
@@ -257,20 +268,19 @@ class CubeView: GLKView {
         let near = GLKVector3Add(self.camera.position, direction)
         let far = GLKVector3Add(self.camera.position, GLKVector3MultiplyScalar(direction, self.camera.far / self.camera.near))
         
-//        print("near : " + String(near.x) + " " + String(near.y) + " " + String(near.z))
-//        print("far : " + String(far.x) + " " + String(far.y) + " " + String(far.z))
+        //print("near : " + String(near.x) + " " + String(near.y) + " " + String(near.z))
+        //print("far : " + String(far.x) + " " + String(far.y) + " " + String(far.z))
         
-        for var index = 1; index <= Indices.count; index++ {
+        for var index = 1; index <= indices.count; index++ {
             if index != 1 && index % 3 == 0{
-                let aa = Vertices[Int(Indices[index-3])].Position
-                let bb = Vertices[Int(Indices[index-2])].Position
-                let cc = Vertices[Int(Indices[index-1])].Position
-                let nn = Vertices[Int(Indices[index-1])].Normal
+                let aa = vertices[Int(indices[index-3])].Position
+                let bb = vertices[Int(indices[index-2])].Position
+                let cc = vertices[Int(indices[index-1])].Position
+                let nn = vertices[Int(indices[index-1])].Normal
                 let a = GLKVector3Make(aa.x, aa.y, aa.z)
                 let b = GLKVector3Make(bb.x, bb.y, bb.z)
                 let c = GLKVector3Make(cc.x, cc.y, cc.z)
-                let n = GLKVector3Make(nn.x, nn.y, nn.z)
-//                let data = intersectsTriangle(GLKVector3Make(0, 0, 8), ray:GLKVector3Make(0, 0, -20),  a: a, b: b, c: c)
+                let n = GLKVector3Make(Float(nn.x), Float(nn.y), Float(nn.z))
                 let data = intersectsTriangle(near, far:far,  a: a, b: b, c: c, normal:n)
                 if data.intersect {
                     print(String( data.result!.x) + " " + String( data.result!.y) + " " + String( data.result!.z) + " ")
@@ -282,8 +292,7 @@ class CubeView: GLKView {
     }
     
     override func touchesBegan(touchSet: Set<UITouch>, withEvent event: UIEvent!) {
-        //        self.paused = !self.paused
-        
+        self.controller?.paused = false
         let touches = Array(touchSet)
         if touches.count >= 1{
             let touch:UITouch = touches.first!
@@ -297,8 +306,7 @@ class CubeView: GLKView {
     }
     
     override func touchesMoved(touchSet: Set<UITouch>, withEvent event: UIEvent!) {
-        //        self.paused = !self.paused
-        
+        self.controller?.paused = false
         let touches = Array(touchSet)
         if touches.count >= 1{
             let touch:UITouch = touches.first!
@@ -314,24 +322,24 @@ class CubeView: GLKView {
         
     }
     
+    override func touchesEnded(touches: Set<UITouch>, withEvent event: UIEvent?) {
+        self.controller?.paused = true
+    }
+    
     
     
     override func drawRect(rect:CGRect){
         if self.controller != nil {
             
             self.cubeEffect.prepareToDraw()
-            
-//            var modelViewMatrix = GLKMatrix4MakeTranslation(0.0, 0.0, 0.0)
-//            modelViewMatrix = GLKMatrix4Multiply(modelViewMatrix, self.camera.view)
             self.cubeEffect.transform.modelviewMatrix = self.camera.view
-            
             
             glClearColor(1, 1, 1, 1.0);
             glClear(GLbitfield(GL_COLOR_BUFFER_BIT));
         
             glBindVertexArrayOES(vertexArray);
         
-            glDrawElements(GLenum(GL_TRIANGLES), GLsizei(Indices.count), GLenum(GL_UNSIGNED_BYTE), UnsafePointer<Int>(bitPattern: 0))
+            glDrawElements(GLenum(GL_TRIANGLES), GLsizei(indices.count), GLenum(GL_UNSIGNED_INT), UnsafePointer<Int>(bitPattern: 0))
             
         }
     }
