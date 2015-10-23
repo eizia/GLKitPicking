@@ -43,6 +43,38 @@ extension Int {
     
 }
 
+struct Utils {
+    
+    static var timeRecorder = NSMutableDictionary()
+    static var analysisRecorder = NSMutableDictionary()
+    static var delayRecorder:[Bool] = []
+    
+    static func setDelay(time:Double = 1, closure:()->()) -> Int {
+        let index:Int = delayRecorder.count
+        delayRecorder.append(true)
+        
+        dispatch_after(
+            dispatch_time(
+                DISPATCH_TIME_NOW,
+                Int64(time * Double(NSEC_PER_SEC))
+            ),
+            dispatch_get_main_queue(), {
+                if self.delayRecorder[index]{
+                    closure()
+                }
+        })
+        
+        return index
+    }
+    
+    static func cancelDelay(index:Int = -1){
+        if -1 < index && index < delayRecorder.count && delayRecorder[index]{
+            delayRecorder[index] = false
+        }
+    }
+}
+
+
 class CubeView: GLKView {
     
     var _anchor_position:CGPoint!
@@ -50,9 +82,9 @@ class CubeView: GLKView {
     var _beta:Float!
     var _garma:Float!
     var indexBuffer: GLuint = GLuint()
-    var indexBufferSize:Int = 36 * 4 * 1024
+    var indexBufferSize:Int = 36 * 4 * 1024 * 8
     var vertexBuffer: GLuint = GLuint()
-    var vertexBufferSize:Int = 24 * 40 * 1024
+    var vertexBufferSize:Int = 24 * 40 * 1024 * 8
     var vertexArray: GLuint = GLuint()
     var cubeEffect = GLKBaseEffect()
     var controller:GLKViewController?
@@ -95,6 +127,7 @@ class CubeView: GLKView {
         
         EAGLContext.setCurrentContext(self.context)
         glEnable(GLenum(GL_CULL_FACE))
+        glEnable(GLenum(GL_DEPTH_TEST));
         
         self.cubeEffect.colorMaterialEnabled = GLboolean(GL_TRUE)
         self.cubeEffect.light0.enabled = GLboolean(GL_TRUE)
@@ -159,6 +192,8 @@ class CubeView: GLKView {
         if self.controller != nil {
             self.camera = SphereCamera(width: self.frame.width, height: self.frame.height)
             self.cubeEffect.transform.projectionMatrix = self.camera.projection
+            
+            Utils.setDelay(2, closure: testCreating)
         }
     }
     
@@ -254,6 +289,30 @@ class CubeView: GLKView {
         }
     }
     
+    func testCreating(){
+        
+        var delay:Int = -1
+        
+        
+        func delayFn(){
+            
+            let ves = genOneCubeVertices(GLKVector3Make(Float(appendIndex % 10), Float(appendIndex%100 / 10), Float(appendIndex/100)), color: (Float(appendIndex % 10) / Float(10), Float(appendIndex % 100) / Float(100), Float(appendIndex)/1000, 1))
+            let ins = genOneCubeIndices(appendIndex)
+            vertices.appendContentsOf(ves)
+            indices.appendContentsOf(ins)
+            pushVertexBuffer(appendIndex, number: 1)
+            pushIndexBuffer(appendIndex, number: 1)
+            appendIndex++
+            
+            if delay < 1000{
+                delay = Utils.setDelay(0.005, closure: delayFn)
+            }
+            
+        }
+        delayFn()
+
+    }
+    
     func pick(x x:Float, y:Float){
         
         //follow http://schabby.de/picking-opengl-ray-tracing/
@@ -326,17 +385,17 @@ class CubeView: GLKView {
             _garma = self.camera.garma
             pick(x: Float(_anchor_position.x), y: Float(_anchor_position.y))
             
-            let previousIndex = appendIndex
-            for var index = 0; index < 10; ++index {
-                let ves = genOneCubeVertices(GLKVector3Make(Float(appendIndex % 10), Float(appendIndex%100 / 10), Float(appendIndex/100)), color: (Float(appendIndex % 10) / Float(10), Float(appendIndex % 100) / Float(100), Float(appendIndex)/1000, 1))
-                let ins = genOneCubeIndices(appendIndex)
-                vertices.appendContentsOf(ves)
-                indices.appendContentsOf(ins)
-                appendIndex++
-            }
-            
-            pushVertexBuffer(previousIndex, number: 10)
-            pushIndexBuffer(previousIndex, number: 10)
+//            let previousIndex = appendIndex
+//            for var index = 0; index < 10; ++index {
+//                let ves = genOneCubeVertices(GLKVector3Make(Float(appendIndex % 10), Float(appendIndex%100 / 10), Float(appendIndex/100)), color: (Float(appendIndex % 10) / Float(10), Float(appendIndex % 100) / Float(100), Float(appendIndex)/1000, 1))
+//                let ins = genOneCubeIndices(appendIndex)
+//                vertices.appendContentsOf(ves)
+//                indices.appendContentsOf(ins)
+//                appendIndex++
+//            }
+//            
+//            pushVertexBuffer(previousIndex, number: 10)
+//            pushIndexBuffer(previousIndex, number: 10)
         }
         
     }
