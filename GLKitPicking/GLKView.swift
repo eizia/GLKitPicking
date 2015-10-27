@@ -127,7 +127,7 @@ class CubeView: GLKView {
         
         EAGLContext.setCurrentContext(self.context)
         glEnable(GLenum(GL_CULL_FACE))
-        glEnable(GLenum(GL_DEPTH_TEST));
+//        glEnable(GLenum(GL_DEPTH_TEST));
         
         self.cubeEffect.colorMaterialEnabled = GLboolean(GL_TRUE)
         self.cubeEffect.light0.enabled = GLboolean(GL_TRUE)
@@ -190,7 +190,7 @@ class CubeView: GLKView {
             self.camera = SphereCamera(width: self.frame.width, height: self.frame.height)
             self.cubeEffect.transform.projectionMatrix = self.camera.projection
             
-            Utils.setDelay(2, closure: testCreating)
+//            Utils.setDelay(2, closure: testCreating)
         }
     }
     
@@ -382,17 +382,17 @@ class CubeView: GLKView {
             _garma = self.camera.garma
             pick(x: Float(_anchor_position.x), y: Float(_anchor_position.y))
             
-//            let previousIndex = appendIndex
-//            for var index = 0; index < 10; ++index {
-//                let ves = genOneCubeVertices(GLKVector3Make(Float(appendIndex % 10), Float(appendIndex%100 / 10), Float(appendIndex/100)), color: (Float(appendIndex % 10) / Float(10), Float(appendIndex % 100) / Float(100), Float(appendIndex)/1000, 1))
-//                let ins = genOneCubeIndices(appendIndex)
-//                vertices.appendContentsOf(ves)
-//                indices.appendContentsOf(ins)
-//                appendIndex++
-//            }
-//            
-//            pushVertexBuffer(previousIndex, number: 10)
-//            pushIndexBuffer(previousIndex, number: 10)
+            let previousIndex = appendIndex
+            for var index = 0; index < 10; ++index {
+                let ves = genOneCubeVertices(GLKVector3Make(Float(appendIndex % 10), Float(appendIndex%100 / 10), Float(appendIndex/100)), color: (Float(appendIndex % 10) / Float(10), Float(appendIndex % 100) / Float(100), Float(appendIndex)/1000, 1))
+                let ins = genOneCubeIndices(appendIndex)
+                vertices.appendContentsOf(ves)
+                indices.appendContentsOf(ins)
+                appendIndex++
+            }
+            
+            pushVertexBuffer(previousIndex, number: 10)
+            pushIndexBuffer(previousIndex, number: 10)
         }
         
     }
