@@ -179,12 +179,9 @@ class CubeView: GLKView {
     
     func pushVertexBuffer(cubeIndex:Int, number:Int){
         glBufferSubData(GLenum(GL_ARRAY_BUFFER), GLintptr(cubeIndex * 24 * sizeof(Vertex)), GLsizeiptr(number * 24 * sizeof(Vertex)), &vertices + cubeIndex * 24 * sizeof(Vertex))
-        
-//        glBufferData(GLenum(GL_ARRAY_BUFFER), vertexBufferSize, vertices, GLenum(GL_DYNAMIC_DRAW))
     }
     func pushIndexBuffer(cubeIndex:Int, number:Int){
         glBufferSubData(GLenum(GL_ELEMENT_ARRAY_BUFFER), cubeIndex * 36 * sizeof(GLuint), number * 36 * sizeof(GLuint), &indices + cubeIndex * 36 * sizeof(GLuint))
-//        glBufferData(GLenum(GL_ELEMENT_ARRAY_BUFFER), indexBufferSize, indices, GLenum(GL_DYNAMIC_DRAW))
     }
         
     func resize(){
@@ -418,7 +415,7 @@ class CubeView: GLKView {
     }
     
     override func touchesEnded(touches: Set<UITouch>, withEvent event: UIEvent?) {
-        self.controller?.paused = true
+//        self.controller?.paused = true
     }
     
     
